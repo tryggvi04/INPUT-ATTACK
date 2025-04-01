@@ -1,10 +1,11 @@
-[gd_scene load_steps=14 format=3 uid="uid://bln4kl546nsaa"]
+[gd_scene load_steps=16 format=3 uid="uid://bln4kl546nsaa"]
 
 [ext_resource type="Script" uid="uid://btrctuv6g1h5q" path="res://Scripts/attack_controller.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://j6mlpxf53a2i" path="res://Assets/1976606-200.png" id="2_0xm2m"]
 [ext_resource type="Texture2D" uid="uid://b6f7sjtaww0si" path="res://Assets/Keyboard Letters and Symbols.png" id="2_h2yge"]
 [ext_resource type="AudioStream" uid="uid://ctvdykdkrxhbe" path="res://Assets/Sounds/knife_unsheathe_03.wav" id="4_1bvp3"]
 [ext_resource type="Script" uid="uid://d2yrs5e1q8odx" path="res://enemy.gd" id="5_5vw27"]
+[ext_resource type="Script" uid="uid://dyewv7rp5sqh7" path="res://perfect_time.gd" id="6_4c57u"]
 [ext_resource type="Texture2D" uid="uid://b2fagua1whryd" path="res://Assets/slime.png" id="6_kek77"]
 [ext_resource type="Texture2D" uid="uid://iv8o62hi56xx" path="res://Assets/healthbarUnder.png" id="7_4c57u"]
 [ext_resource type="Texture2D" uid="uid://nbay6vvb3qts" path="res://Assets/healthbarProgress.png" id="8_efxa6"]
@@ -27,9 +28,12 @@ region = Rect2(33, 2, 13, 12)
 atlas = ExtResource("2_h2yge")
 region = Rect2(49, 2, 13, 12)
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_4c57u"]
+specular_color = Color(0, 0, 0, 1)
+
 [node name="Node2D" type="Node2D"]
 
-[node name="AttackController" type="Node2D" parent="."]
+[node name="AttackController" type="Node2D" parent="." groups=["attackController"]]
 script = ExtResource("1_ig7tw")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -142,6 +146,35 @@ text = "Attack"
 layout_mode = 2
 theme_override_font_sizes/font_size = 128
 text = "Bag"
+
+[node name="perfect_time_UI" type="Control" parent="CanvasLayer" groups=["perfect_time_UI"]]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PerfectTime" type="TextureProgressBar" parent="CanvasLayer/perfect_time_UI"]
+texture_filter = 1
+offset_left = 44.0
+offset_top = 12.0
+offset_right = 108.0
+offset_bottom = 52.0
+scale = Vector2(5, 5)
+value = 5.0
+fill_mode = 6
+texture_under = ExtResource("7_4c57u")
+texture_progress = ExtResource("8_efxa6")
+script = ExtResource("6_4c57u")
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/perfect_time_UI"]
+modulate = Color(1, 0.027451, 0.662745, 0.392157)
+offset_left = 196.0
+offset_top = 27.0
+offset_right = 236.0
+offset_bottom = 67.0
+scale = Vector2(0.404, 0.5)
+texture = SubResource("CanvasTexture_4c57u")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." groups=["sound_player"]]
 volume_db = -22.486

@@ -7,6 +7,7 @@ extends Node2D
 @onready var success_sound = preload("res://Assets/Sounds/jingle_chime_04_positive.wav")  # Preload the audio file as an AudioStream
 
 var base_damage = 10
+var perfect_time_damage = 25
 
 var sound_controller
 
@@ -18,6 +19,9 @@ signal attacking_signal
 var slashSpeaker
 
 var keys_UI
+
+var base_perfect_time = 1
+var perfect_time = 1
 
 var texture_regions = {
 	"KEY_UP": Rect2i(1.0, 2, 13, 12),       # Region for QTE_1
@@ -37,12 +41,18 @@ func _ready() -> void:
 	
 
 func _process(delta: float) -> void:
+	print(perfect_time)
 	if attacking:
 		handle_attack_input()
+		perfect_time -= delta
+		
+		if (perfect_time < -0.05):
+			get_tree().get_first_node_in_group("perfect_time_UI").visible = false
 
 
 
 func attack():
+	get_tree().get_first_node_in_group("perfect_time_UI").visible = true
 	get_tree().get_first_node_in_group("turnOptions").visible = false
 	keys_UI = get_tree().get_first_node_in_group("KeysUI")
 	attacking = true
@@ -85,13 +95,17 @@ func handle_attack_input():
 	# Check if any action in the input list is pressed
 	for action in input_list:
 		if Input.is_action_just_pressed(action):
+			
 			# If the correct action is pressed, advance the QTE sequence
 			if action == randomized_inputs[current_position]:
-				get_tree().get_first_node_in_group("enemy").take_damage(base_damage)
+				if (abs(perfect_time) <= 0.05):
+					get_tree().get_first_node_in_group("enemy").take_damage(perfect_time_damage)
+					sound_controller.stream = load("res://Assets/Sounds/collect_coin_03.wav")
+					sound_controller.play()
+				else:
+					get_tree().get_first_node_in_group("enemy").take_damage(base_damage)
 				
 				slashSpeaker.play()
-				sound_controller.stream = load("res://Assets/Sounds/collect_coin_03.wav")
-				sound_controller.play()
 				keys_UI.get_child(current_position).modulate = "ffffff73"
 				current_position += 1
 				# If the sequence is complete, end the attack successfully
@@ -114,10 +128,13 @@ func handle_attack_input():
 				end_attack(true)
 			else:
 				print("Next QTE: ", randomized_inputs[current_position])  # Print the next QTE input
-			return  # Exit after handling the input
+				get_tree().get_first_node_in_group("perfect_time_UI").visible = true
+			
+			perfect_time = base_perfect_time
 
 
 func end_attack(success: bool):
+	get_tree().get_first_node_in_group("perfect_time_UI").visible = false
 	disable_keys()
 	attacking = false
 	attacking_signal.emit()

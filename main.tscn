@@ -1,9 +1,14 @@
-[gd_scene load_steps=9 format=3 uid="uid://bln4kl546nsaa"]
+[gd_scene load_steps=14 format=3 uid="uid://bln4kl546nsaa"]
 
 [ext_resource type="Script" uid="uid://btrctuv6g1h5q" path="res://Scripts/attack_controller.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://j6mlpxf53a2i" path="res://Assets/1976606-200.png" id="2_0xm2m"]
 [ext_resource type="Texture2D" uid="uid://b6f7sjtaww0si" path="res://Assets/Keyboard Letters and Symbols.png" id="2_h2yge"]
 [ext_resource type="AudioStream" uid="uid://ctvdykdkrxhbe" path="res://Assets/Sounds/knife_unsheathe_03.wav" id="4_1bvp3"]
+[ext_resource type="Script" uid="uid://d2yrs5e1q8odx" path="res://enemy.gd" id="5_5vw27"]
+[ext_resource type="Texture2D" uid="uid://b2fagua1whryd" path="res://Assets/slime.png" id="6_kek77"]
+[ext_resource type="Texture2D" uid="uid://iv8o62hi56xx" path="res://Assets/healthbarUnder.png" id="7_4c57u"]
+[ext_resource type="Texture2D" uid="uid://nbay6vvb3qts" path="res://Assets/healthbarProgress.png" id="8_efxa6"]
+[ext_resource type="Script" uid="uid://ctktt35saq8ll" path="res://enemy_health_bar.gd" id="9_kek77"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0xm2m"]
 resource_local_to_scene = true
@@ -29,24 +34,24 @@ script = ExtResource("1_ig7tw")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
+[node name="inputs" type="HBoxContainer" parent="CanvasLayer"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 32.0
-offset_top = -32.0
-offset_right = 32.0
-offset_bottom = -32.0
+offset_left = -216.0
+offset_top = -61.0
+offset_right = -216.0
+offset_bottom = -61.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 0
 
-[node name="KeysUI" type="Control" parent="CanvasLayer/HBoxContainer" groups=["KeysUI"]]
+[node name="KeysUI" type="Control" parent="CanvasLayer/inputs" groups=["KeysUI"]]
 layout_mode = 2
 
-[node name="InputUp" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI" groups=["Keys"]]
+[node name="InputUp" type="TextureRect" parent="CanvasLayer/inputs/KeysUI" groups=["Keys"]]
 visible = false
 texture_filter = 1
 layout_mode = 0
@@ -56,7 +61,7 @@ offset_right = -240.0
 offset_bottom = 64.0
 texture = SubResource("AtlasTexture_0xm2m")
 
-[node name="arrow" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI/InputUp"]
+[node name="arrow" type="TextureRect" parent="CanvasLayer/inputs/KeysUI/InputUp"]
 texture_filter = 1
 layout_mode = 0
 offset_left = 91.0
@@ -66,7 +71,7 @@ offset_bottom = 206.0
 scale = Vector2(0.318, 0.318)
 texture = ExtResource("2_0xm2m")
 
-[node name="InputDown" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI" groups=["Keys"]]
+[node name="InputDown" type="TextureRect" parent="CanvasLayer/inputs/KeysUI" groups=["Keys"]]
 visible = false
 texture_filter = 1
 layout_mode = 0
@@ -76,7 +81,7 @@ offset_right = -80.0
 offset_bottom = 64.0
 texture = SubResource("AtlasTexture_h2yge")
 
-[node name="arrow2" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI/InputDown"]
+[node name="arrow2" type="TextureRect" parent="CanvasLayer/inputs/KeysUI/InputDown"]
 texture_filter = 1
 layout_mode = 0
 offset_left = 91.0
@@ -86,7 +91,7 @@ offset_bottom = 206.0
 scale = Vector2(0.318, 0.318)
 texture = ExtResource("2_0xm2m")
 
-[node name="InputThree" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI" groups=["Keys"]]
+[node name="InputThree" type="TextureRect" parent="CanvasLayer/inputs/KeysUI" groups=["Keys"]]
 visible = false
 texture_filter = 1
 layout_mode = 0
@@ -95,7 +100,7 @@ offset_right = 80.0
 offset_bottom = 64.0
 texture = SubResource("AtlasTexture_1bvp3")
 
-[node name="arrow3" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI/InputThree"]
+[node name="arrow3" type="TextureRect" parent="CanvasLayer/inputs/KeysUI/InputThree"]
 texture_filter = 1
 layout_mode = 0
 offset_left = 91.0
@@ -105,7 +110,7 @@ offset_bottom = 206.0
 scale = Vector2(0.318, 0.318)
 texture = ExtResource("2_0xm2m")
 
-[node name="InputFour" type="TextureRect" parent="CanvasLayer/HBoxContainer/KeysUI" groups=["Keys"]]
+[node name="InputFour" type="TextureRect" parent="CanvasLayer/inputs/KeysUI" groups=["Keys"]]
 visible = false
 texture_filter = 1
 layout_mode = 0
@@ -128,10 +133,15 @@ grow_horizontal = 2
 grow_vertical = 0
 size_flags_vertical = 8
 
-[node name="Button" type="Button" parent="CanvasLayer/TurnOptions"]
+[node name="Attack" type="Button" parent="CanvasLayer/TurnOptions"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 128
 text = "Attack"
+
+[node name="Bag" type="Button" parent="CanvasLayer/TurnOptions"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 128
+text = "Bag"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." groups=["sound_player"]]
 volume_db = -22.486
@@ -143,4 +153,26 @@ position = Vector2(-417, -307)
 position = Vector2(-465, 163)
 stream = ExtResource("4_1bvp3")
 
-[connection signal="button_down" from="CanvasLayer/TurnOptions/Button" to="AttackController" method="attack"]
+[node name="Slime" type="Node2D" parent="." groups=["enemy"]]
+position = Vector2(-992, -794)
+script = ExtResource("5_5vw27")
+
+[node name="Sprite2D" type="Sprite2D" parent="Slime"]
+texture_filter = 1
+position = Vector2(925, 499)
+scale = Vector2(10, 10)
+texture = ExtResource("6_kek77")
+
+[node name="TextureProgressBar" type="TextureProgressBar" parent="Slime"]
+texture_filter = 1
+offset_left = 772.0
+offset_top = 341.0
+offset_right = 836.0
+offset_bottom = 381.0
+scale = Vector2(5, 5)
+texture_under = ExtResource("7_4c57u")
+texture_progress = ExtResource("8_efxa6")
+script = ExtResource("9_kek77")
+
+[connection signal="button_down" from="CanvasLayer/TurnOptions/Attack" to="AttackController" method="attack"]
+[connection signal="button_down" from="CanvasLayer/TurnOptions/Bag" to="AttackController" method="attack"]

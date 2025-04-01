@@ -6,10 +6,12 @@ extends Node2D
 
 @onready var success_sound = preload("res://Assets/Sounds/jingle_chime_04_positive.wav")  # Preload the audio file as an AudioStream
 
+var base_damage = 10
 
 var sound_controller
 
 var input_list = [] # keeps our QTE inputs
+var randomized_inputs = []
 var attacking = false
 var current_position = 0
 signal attacking_signal
@@ -45,15 +47,32 @@ func attack():
 	keys_UI = get_tree().get_first_node_in_group("KeysUI")
 	attacking = true
 	attacking_signal.emit()
-	input_list.shuffle()
+	randomized_inputs = shuffle_inputs(input_list)
 	keysUI()
 	current_position = 0  
+
+func shuffle_inputs(list: Array):
+	var return_list = []
+	var rng = RandomNumberGenerator.new()
+	for i in range(len(list)):
+		var num = rng.randi_range(0, 100)
+		if num <= 25:
+			return_list.append(input_list[0])
+		elif num <= 50:
+			return_list.append(input_list[1])
+		elif num <= 75:
+			return_list.append(input_list[2])
+		elif num <= 100:
+			return_list.append(input_list[3])
+	print(return_list)
+	return return_list
+	
 
 func keysUI():
 	for i in range(len(keys_UI.get_children(true))):
 		keys_UI.get_child(i).visible = true
 		if (keys_UI.get_child(i).is_in_group("Keys")):
-			keys_UI.get_child(i).texture.region = texture_regions[input_list[i]]
+			keys_UI.get_child(i).texture.region = texture_regions[randomized_inputs[i]]
 			keys_UI.get_child(i).modulate = "ffffff"
 
 func disable_keys():
@@ -67,20 +86,34 @@ func handle_attack_input():
 	for action in input_list:
 		if Input.is_action_just_pressed(action):
 			# If the correct action is pressed, advance the QTE sequence
-			if action == input_list[current_position]:
+			if action == randomized_inputs[current_position]:
+				get_tree().get_first_node_in_group("enemy").take_damage(base_damage)
+				
 				slashSpeaker.play()
 				sound_controller.stream = load("res://Assets/Sounds/collect_coin_03.wav")
 				sound_controller.play()
 				keys_UI.get_child(current_position).modulate = "ffffff73"
 				current_position += 1
 				# If the sequence is complete, end the attack successfully
-				if current_position >= len(input_list):
-					end_attack(true)
-				else:
-					print("Next QTE: ", input_list[current_position])  # Print the next QTE input
 			else:
+				keys_UI.get_child(current_position).modulate = "ffffff73"
+				current_position += 1
 				# If the wrong action is pressed, end the attack as a failure
-				end_attack(false)
+				var rng = RandomNumberGenerator.new()
+				var my_random_number = rng.randi_range(1, 3)
+				
+				match my_random_number:
+					1:
+						sound_controller.stream = failed_sound1
+					2:
+						sound_controller.stream = failed_sound2
+					3:
+						sound_controller.stream = failed_sound3
+				sound_controller.play()
+			if current_position >= len(randomized_inputs):
+				end_attack(true)
+			else:
+				print("Next QTE: ", randomized_inputs[current_position])  # Print the next QTE input
 			return  # Exit after handling the input
 
 
@@ -88,21 +121,5 @@ func end_attack(success: bool):
 	disable_keys()
 	attacking = false
 	attacking_signal.emit()
-	if success:
-		print("You did it!")  # Success message
-		sound_controller.stream = success_sound
-		sound_controller.play()
-	else:
-		print("You failed!")  # Failure message
-		var rng = RandomNumberGenerator.new()
-		var my_random_number = rng.randi_range(1, 3)
-		
-		match my_random_number:
-			1:
-				sound_controller.stream = failed_sound1
-			2:
-				sound_controller.stream = failed_sound2
-			3:
-				sound_controller.stream = failed_sound3
-		sound_controller.play()
 	get_tree().get_first_node_in_group("turnOptions").visible = true
+	randomized_inputs = []

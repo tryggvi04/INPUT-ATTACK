@@ -6,8 +6,8 @@ extends Node2D
 
 @onready var success_sound = preload("res://Assets/Sounds/jingle_chime_04_positive.wav")  # Preload the audio file as an AudioStream
 
-var base_damage = 10
-var perfect_time_damage = 25
+var base_block = 1
+var perfect_time_block = 3
 
 var sound_controller
 
@@ -23,6 +23,12 @@ var keys_UI
 var base_perfect_time = 1
 var perfect_time = 1
 
+var block_list = {
+	"KEY_UP": 0,   
+	"KEY_DOWN": 0,     
+	"KEY_LEFT": 0,   
+	"KEY_RIGHT": 0   
+}
 var texture_regions = {
 	"KEY_UP": Rect2i(1.0, 2, 13, 12),       # Region for QTE_1
 	"KEY_DOWN": Rect2i(17, 2, 13, 12),      # Region for QTE_W
@@ -42,7 +48,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if attacking:
-		handle_attack_input()
+		handle_block_inputs()
 		perfect_time -= delta
 		
 		if (perfect_time < -0.05):
@@ -50,9 +56,9 @@ func _process(delta: float) -> void:
 
 
 
-func attack():
-	get_tree().get_first_node_in_group("perfect_time_UI").visible = true
+func block():
 	get_tree().get_first_node_in_group("perfect_time_UI").get_child(0).controller = self
+	get_tree().get_first_node_in_group("perfect_time_UI").visible = true
 	get_tree().get_first_node_in_group("turnOptions").visible = false
 	keys_UI = get_tree().get_first_node_in_group("KeysUI")
 	attacking = true
@@ -91,7 +97,7 @@ func disable_keys():
 		keys_UI.get_child(i).visible = false
 
 # Handle QTE input during the attack
-func handle_attack_input():
+func handle_block_inputs():
 	# Check if any action in the input list is pressed
 	for action in input_list:
 		if Input.is_action_just_pressed(action):
@@ -99,11 +105,11 @@ func handle_attack_input():
 			# If the correct action is pressed, advance the QTE sequence
 			if action == randomized_inputs[current_position]:
 				if (abs(perfect_time) <= 0.05):
-					get_tree().get_first_node_in_group("enemy").take_damage(perfect_time_damage)
+					block_list[action] += perfect_time_block
 					sound_controller.stream = load("res://Assets/Sounds/collect_coin_03.wav")
 					sound_controller.play()
 				else:
-					get_tree().get_first_node_in_group("enemy").take_damage(base_damage)
+					block_list[action] += base_block
 				
 				slashSpeaker.play()
 				keys_UI.get_child(current_position).modulate = "ffffff73"
@@ -125,7 +131,7 @@ func handle_attack_input():
 						sound_controller.stream = failed_sound3
 				sound_controller.play()
 			if current_position >= len(randomized_inputs):
-				end_attack(true)
+				end_block(true)
 			else:
 				print("Next QTE: ", randomized_inputs[current_position])  # Print the next QTE input
 				get_tree().get_first_node_in_group("perfect_time_UI").visible = true
@@ -133,10 +139,11 @@ func handle_attack_input():
 			perfect_time = base_perfect_time
 
 
-func end_attack(success: bool):
+func end_block(success: bool):
 	get_tree().get_first_node_in_group("perfect_time_UI").visible = false
 	disable_keys()
 	attacking = false
 	attacking_signal.emit()
 	get_tree().get_first_node_in_group("turnOptions").visible = true
 	randomized_inputs = []
+	print(block_list)
